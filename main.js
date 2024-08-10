@@ -1,5 +1,6 @@
 import { argv } from 'node:process';
 import {crawlPage} from "./crawl.js";
+import {printReport} from "./report.js";
 
 async function main() {
 
@@ -9,7 +10,7 @@ async function main() {
     }
 
     const result = await crawlPage(argv[2], argv[2], {})
-    console.log(result)
+    printReport(result)
 }
 
 main()
