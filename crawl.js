@@ -15,6 +15,10 @@ function normalizeURL(url) {
 }
 
 function getURLsFromHTML (html, baseURL) {
+    if (baseURL === undefined) {
+        console.log("Missing baseURL")
+        return
+    }
     const urls = []
     const dom = new JSDOM(html)
     const anchors = dom.window.document.querySelectorAll("a")
@@ -26,28 +30,58 @@ function getURLsFromHTML (html, baseURL) {
             urls.push(anchor.host + anchor.pathname)
         }
     })
-    console.log(urls)
     return urls
 }
 
-async function crawlPage(url) {
+async function crawlPage(baseURL, currentURL, pages) {
+    let currentAsURL
+    try {
+        currentAsURL = new URL(currentURL)
+    }
+    catch (e) {
+        // console.log(`Error: ${e}`)
+        return pages
+    }
+    const baseAsURL = new URL(baseURL)
+    if (!currentAsURL.host.includes(baseAsURL.host)) {
+        return pages
+    }
+    const normalizedCurrent = normalizeURL(currentURL)
+    if (normalizedCurrent in pages) {
+        pages[normalizedCurrent] += 1
+        return pages
+    }
+    else {
+        pages[normalizedCurrent] = 1
+    }
+    const html = await requestPage(currentURL)
+    const urlsToRequest = getURLsFromHTML(html, baseURL)
+    if (urlsToRequest.length !== 0) {
+        urlsToRequest.forEach(url => {
+            crawlPage(baseURL, url, pages)
+        })
+    }
+    return pages
+}
+
+async function requestPage(url) {
     try {
         const response = await fetch(url)
-        const text = await response.text();
+        const html = await response.text();
 
         if (!response.headers.get("content-type").includes("text/html")) {
-            console.log(`Unexpected content type: ${response.headers.get("content-type")}`)
+            // console.log(`Unexpected content type: ${response.headers.get("content-type")}`)
             return
         }
         if (response.status >= 400){
-            console.log(`Error: ${response.status}`)
+            // console.log(`Error: ${response.status}`)
             return
         }
-        return text
+        return html
     }
     catch (e) {
-        console.log(`Error with request: ${e}`)
+        // console.log(`Error with request: ${e}`)
     }
 }
 
-export { normalizeURL, getURLsFromHTML, crawlPage}
+export { normalizeURL, getURLsFromHTML, crawlPage, requestPage}
