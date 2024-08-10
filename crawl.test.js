@@ -1,5 +1,5 @@
 import { test, expect } from "@jest/globals";
-import { normalizeURL, getURLsFromHTML } from "./crawl.js";
+import {normalizeURL, getURLsFromHTML, crawlPage} from "./crawl.js";
 
 test("url with ending /", () => {
     expect(normalizeURL("https://blog.boot.dev/path/")).toBe("blog.boot.dev/path")
@@ -10,7 +10,7 @@ test("url", () => {
 })
 
 test("getURLsFromHTML basic", () => {
-    let html = "<html>\n" +
+    const html = "<html>\n" +
         "    <body>\n" +
         "        <a href=\"https://blog.boot.dev\"><span>Go to Boot.dev</span></a>\n" +
         "        <a href=\"/something/wee\"><span>relative</span></a>\n" +
@@ -18,4 +18,9 @@ test("getURLsFromHTML basic", () => {
         "</html>"
     const expected = ["blog.boot.dev/", "blogs.boot.dev/something/wee"]
     expect(getURLsFromHTML(html, "blogs.boot.dev")).toEqual(expect.arrayContaining(expected))
+})
+
+test("crawlPage", async () => {
+    const url = "https://wagslane.dev"
+    expect(await crawlPage(url)).toContain("a-case-against-a-case-for-the-book-of-mormon")
 })

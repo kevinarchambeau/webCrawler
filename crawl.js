@@ -30,4 +30,24 @@ function getURLsFromHTML (html, baseURL) {
     return urls
 }
 
-export { normalizeURL, getURLsFromHTML}
+async function crawlPage(url) {
+    try {
+        const response = await fetch(url)
+        const text = await response.text();
+
+        if (!response.headers.get("content-type").includes("text/html")) {
+            console.log(`Unexpected content type: ${response.headers.get("content-type")}`)
+            return
+        }
+        if (response.status >= 400){
+            console.log(`Error: ${response.status}`)
+            return
+        }
+        return text
+    }
+    catch (e) {
+        console.log(`Error with request: ${e}`)
+    }
+}
+
+export { normalizeURL, getURLsFromHTML, crawlPage}
