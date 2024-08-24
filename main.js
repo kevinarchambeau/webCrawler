@@ -13,4 +13,4 @@ async function main() {
     printReport(result)
 }
 
-main()
+await main()

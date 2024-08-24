@@ -34,6 +34,7 @@ function getURLsFromHTML (html, baseURL) {
 }
 
 async function crawlPage(baseURL, currentURL, pages) {
+    // console.log(pages)
     let currentAsURL
     try {
         currentAsURL = new URL(currentURL)
@@ -57,9 +58,9 @@ async function crawlPage(baseURL, currentURL, pages) {
     const html = await requestPage(currentURL)
     const urlsToRequest = getURLsFromHTML(html, baseURL)
     if (urlsToRequest.length !== 0) {
-        urlsToRequest.forEach(url => {
-            crawlPage(baseURL, url, pages)
-        })
+        for (const url of urlsToRequest) {
+            await crawlPage(baseURL, url, pages)
+        }
     }
     return pages
 }
